@@ -4,7 +4,7 @@ import socket
 def tcpClient():
     clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     clientSocket.connect(("localhost", 5778))
-    print "enter quit to exit"
+    print clientSocket.recv(1024)
     sendMessage = ""
     while sendMessage != "quit":
         sendMessage = raw_input('>')

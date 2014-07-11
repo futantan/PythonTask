@@ -14,6 +14,6 @@ def tcpClient():
         print clientSocket.recv(1024)
     clientSocket.send(sendMessage)
     clientSocket.close()
-
+    
 
 tcpClient()

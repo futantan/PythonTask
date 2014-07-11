@@ -1,3 +1,4 @@
+# Project Interpreter Version: 2.7.6
 import socket
 
 
@@ -14,6 +15,6 @@ def tcpClient():
         print clientSocket.recv(1024)
     clientSocket.send(sendMessage)
     clientSocket.close()
-    
+
 
 tcpClient()

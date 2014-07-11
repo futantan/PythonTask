@@ -1,9 +1,14 @@
+# Project Interpreter Version: 2.7.6
 import socket
+from sys import argv
 import threading
 import MySQLdb
 from warnings import filterwarnings
 
+# ignore warnings from MySQL
 filterwarnings('ignore', category=MySQLdb.Warning)
+
+passWord = None
 
 
 def tcpServer():
@@ -12,7 +17,8 @@ def tcpServer():
     serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     serverSocket.bind(('', 5778))
     serverSocket.listen(10)
-
+    testThread = HandleThread("testThread", None)
+    testThread.start()
     try:
         while True:
             clientSocket, (remoteHost, remotePort) = serverSocket.accept()
@@ -29,12 +35,12 @@ def tcpServer():
 class HandleThread(threading.Thread):
     def __init__(self, name, cSocket):
         threading.Thread.__init__(self, name=name)
-        self.mysql = MySQL(password='fq930225', socket=cSocket)
+        self.mysql = MySQL(password=passWord, socket=cSocket)
         self.keepRunning = True
         self.clientSocket = cSocket
 
     def run(self):
-        while self.keepRunning:
+        while self.keepRunning and self.clientSocket is not None:
             msgFromClient = self.clientSocket.recv(1024)
             print "get message from thread:" + self.getName() + ":" + msgFromClient
             if msgFromClient == "quit":
@@ -144,4 +150,10 @@ Attention: do not forget wrap your domain name with ', then the port
         print greeting
 
 
-tcpServer()
+if len(argv) == 2:
+    script, passWord = argv
+    tcpServer()
+else:
+    # if the parameter is not correct, then exit
+    print "your script is incorrect, please check it."
+    exit()

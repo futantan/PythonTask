@@ -1,61 +1,96 @@
-# coding=utf-8
-# Project Interpreter Version: 2.7.6
+# _*_ coding:utf-8 _*_
+# Filename:ClientUI.py
+
 from Tkinter import *
+import Tkinter
 import socket
-import time
 import sys
 
 reload(sys)
 sys.setdefaultencoding('utf8')
 
 
-def getCurrentTime(name):
-    return name + ':' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + '\n  '
+class Client():
+    title = 'Do not stop talking'
+    host = 'localhost'
+    port = 5778
+    flag = False
+
+    def __init__(self):
+        self.root = Tkinter.Tk()
+        self.root.title(self.title)
+        self.clientSocket = None
+
+        # 4 Frame to arrange the layout
+        self.frame = [Tkinter.Frame(), Tkinter.Frame(), Tkinter.Frame(), Tkinter.Frame()]
+
+        # ScrollBar
+        self.chatTextScrollBar = Tkinter.Scrollbar(self.frame[0])
+        self.chatTextScrollBar.pack(side=Tkinter.RIGHT, fill=Tkinter.Y)
+
+        # Bind the ScrollBar with Text Area
+        self.chatText = Tkinter.Listbox(self.frame[0], width=70, height=18)
+        self.chatText['yscrollcommand'] = self.chatTextScrollBar.set
+        self.chatText.pack(expand=1, fill=Tkinter.BOTH)
+        self.chatTextScrollBar['command'] = self.chatText.yview
+        self.frame[0].pack(expand=1, fill=Tkinter.BOTH)
+
+        label = Tkinter.Label(self.frame[1], height=2)
+        label.pack(fill=Tkinter.BOTH)
+        self.frame[1].pack(expand=1, fill=Tkinter.BOTH)
+
+        # ScrollBar
+        self.inputTextScrollBar = Tkinter.Scrollbar(self.frame[2])
+        self.inputTextScrollBar.pack(side=Tkinter.RIGHT, fill=Tkinter.Y)
+
+        # Bind the ScrollBar with Input Text Area
+        self.inputText = Tkinter.Text(self.frame[2], width=70, height=8)
+        self.inputText['yscrollcommand'] = self.inputTextScrollBar.set
+        self.inputText.pack(expand=1, fill=Tkinter.BOTH)
+        self.inputTextScrollBar['command'] = self.chatText.yview()
+        self.frame[2].pack(expand=1, fill=Tkinter.BOTH)
+
+        # send message button
+        self.sendButton = Tkinter.Button(self.frame[3], text='Send', width=10, command=self.sendMessage)
+        self.sendButton.pack(expand=1, side=Tkinter.BOTTOM and Tkinter.RIGHT, padx=15, pady=8)
+
+        # close button
+        self.closeButton = Tkinter.Button(self.frame[3], text='Close', width=10, command=self.close)
+        self.closeButton.pack(expand=1, side=Tkinter.RIGHT, padx=15, pady=8)
+        self.frame[3].pack(expand=1, fill=Tkinter.BOTH)
+
+    def getCurrentTime(self, name):
+        return name + ':'
+        # + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + '\n  '
+
+    # send message and receive from server
+    def sendMessage(self):
+        # 在聊天内容上方加一行 显示发送人及发送时间
+        self.chatText.insert(END, self.getCurrentTime('======ME======:'))
+        msgSend = self.inputText.get('0.0', END)
+        self.chatText.insert(END, msgSend)
+        self.inputText.delete('0.0', END)
+        self.clientSocket.send(msgSend)
+        msgReceive = self.clientSocket.recv(1024)
+        self.chatText.insert(END, self.getCurrentTime('=====Server====='))
+        self.chatText.insert(END, msgReceive)
+
+    def close(self):
+        sys.exit()
+
+    def connectWithServer(self):
+        self.clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.clientSocket.connect((self.host, self.port))
+        msgReceive = self.clientSocket.recv(1024)
+        self.chatText.insert(END, self.getCurrentTime('=====Server====='))
+        self.chatText.insert(END, msgReceive)
 
 
-def sendmessage():
-    # 在聊天内容上方加一行 显示发送人及发送时间
-    text_msglist.insert(END, getCurrentTime('ME'), 'green')
-    msgSend = text_msg.get('0.0', END)
-    text_msglist.insert(END, msgSend)
-    text_msg.delete('0.0', END)
-    clientSocket.send(msgSend)
-    msgReceive = clientSocket.recv(1024)
-    text_msglist.insert(END, getCurrentTime('Server'), 'green')
-    text_msglist.insert(END, msgReceive)
+def main():
+    client = Client()
+    client.connectWithServer()
+    client.root.mainloop()
 
 
-app = Tk()
-app.title("Do not stop talking")
-
-frame_left_top = Frame(width=380, height=270, bg='white')
-frame_left_center = Frame(width=380, height=100, bg='white')
-frame_left_bottom = Frame(width=380, height=20)
-frame_right = Frame(width=170, height=400, bg='white')
-
-text_msglist = Text(frame_left_top)
-text_msg = Text(frame_left_center)
-button_sendmsg = Button(frame_left_bottom, text='发送', command=sendmessage)
-
-# 创建一个绿色的tag
-text_msglist.tag_config('green', foreground='#008B00')
-# 使用grid设置各个容器位置
-frame_left_top.grid(row=0, column=0, padx=2, pady=5)
-frame_left_center.grid(row=1, column=0, padx=2, pady=5)
-frame_left_bottom.grid(row=2, column=0)
-frame_right.grid(row=0, column=1, rowspan=3, padx=4, pady=5)
-frame_left_top.grid_propagate(0)
-frame_left_center.grid_propagate(0)
-frame_left_bottom.grid_propagate(0)
-# 把元素填充进frame
-text_msglist.grid()
-text_msg.grid()
-button_sendmsg.grid(sticky=E)
-
-clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-clientSocket.connect(("localhost", 5778))
-
-app.mainloop()
-
-
-
+if __name__ == '__main__':
+    main()

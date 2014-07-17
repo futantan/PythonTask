@@ -32,6 +32,7 @@ class HandleThread(threading.Thread):
         self.keepRunning = True
         self.remoteHost = remoteHost
         self.clientSocket = cSocket
+        self.clientSocket.send("Hello! You have connected with server successfully! Play 'ECHO' with me")
 
     def run(self):
         while self.keepRunning and self.clientSocket is not None:

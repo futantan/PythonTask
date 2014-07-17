@@ -1,7 +1,12 @@
+# coding=utf-8
 # Project Interpreter Version: 2.7.6
 import socket
 import threading
 import time
+import sys
+
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 
 def tcpServer():
@@ -34,9 +39,10 @@ class HandleThread(threading.Thread):
             if not msgFromClient:
                 print "connection end with :" + self.remoteHost
                 break
-            else:
-                print "get message from thread:" + self.getName() + ":" + msgFromClient
-            clientSocket.send(msgFromClient + " " + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())))
+            print "get message from thread:" + self.remoteHost + ":" + msgFromClient.rstrip('\n')
+            clientSocket.send(
+                msgFromClient.rstrip('\n') + " " + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + '\n')
+        self.clientSocket.close()
 
     def stopThread(self):
         self.keepRunning = False

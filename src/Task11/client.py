@@ -3,18 +3,26 @@
 from Tkinter import *
 import socket
 import time
+import sys
+
+reload(sys)
+sys.setdefaultencoding('utf8')
+
+
+def getCurrentTime(name):
+    return name + ':' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + '\n  '
 
 
 def sendmessage():
     # 在聊天内容上方加一行 显示发送人及发送时间
-    msgcontent = 'ME:' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + '\n  '
-    text_msglist.insert(END, msgcontent, 'green')
+    text_msglist.insert(END, getCurrentTime('ME'), 'green')
     msgSend = text_msg.get('0.0', END)
-    clientSocket.send(msgSend)
-    msgReceive = clientSocket.recv(1024)
-    print "receive:" + msgReceive
     text_msglist.insert(END, msgSend)
     text_msg.delete('0.0', END)
+    clientSocket.send(msgSend)
+    msgReceive = clientSocket.recv(1024)
+    text_msglist.insert(END, getCurrentTime('Server'), 'green')
+    text_msglist.insert(END, msgReceive)
 
 
 app = Tk()

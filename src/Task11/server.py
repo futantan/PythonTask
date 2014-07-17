@@ -13,7 +13,7 @@ def tcpServer():
         while True:
             clientSocket, (remoteHost, remotePort) = serverSocket.accept()
             print "[%s:%s] connected" % (remoteHost, remotePort)
-            thread = HandleThread("thread", clientSocket)
+            thread = HandleThread(remoteHost, clientSocket)
             thread.start()
 
     except BaseException, e:
@@ -22,15 +22,20 @@ def tcpServer():
 
 
 class HandleThread(threading.Thread):
-    def __init__(self, name, cSocket):
-        threading.Thread.__init__(self, name=name)
+    def __init__(self, remoteHost, cSocket):
+        threading.Thread.__init__(self)
         self.keepRunning = True
+        self.remoteHost = remoteHost
         self.clientSocket = cSocket
 
     def run(self):
         while self.keepRunning and self.clientSocket is not None:
             msgFromClient = self.clientSocket.recv(1024)
-            print "get message from thread:" + self.getName() + ":" + msgFromClient
+            if not msgFromClient:
+                print "connection end with :" + self.remoteHost
+                break
+            else:
+                print "get message from thread:" + self.getName() + ":" + msgFromClient
             clientSocket.send(msgFromClient + " " + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())))
 
     def stopThread(self):

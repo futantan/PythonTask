@@ -65,7 +65,6 @@ class Client():
 
     # send message and receive from server
     def sendMessage(self):
-        # 在聊天内容上方加一行 显示发送人及发送时间
         self.chatText.insert(END, self.getCurrentTime('======ME======:'))
         msgSend = self.inputText.get('0.0', END)
         self.chatText.insert(END, msgSend)
